@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+</head>
+<body>
+    <h1>Messages from Backend</h1>
+    <ul id="message-list"></ul>
+    <p id="error-message" style="color: red;"></p>
+
+    <script>
+        async function fetchMessages() {
+            try {
+                let response = await fetch("http://localhost:8080/messages"); // Ambil data dari backend
+                if (!response.ok) throw new Error("Server error: " + response.status);
+                let data = await response.json();
+
+                let messageList = document.getElementById("message-list");
+                messageList.innerHTML = ""; // Hapus isi lama
+                
+                data.forEach(msg => {
+                    let li = document.createElement("li");
+                    li.textContent = msg.text;
+                    messageList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+                document.getElementById("error-message").textContent = "Error: " + error.message;
+            }
+        }
+
+        fetchMessages(); // Panggil saat halaman pertama kali dimuat
+    </script>
+</body>
+</html>

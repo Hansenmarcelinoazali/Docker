@@ -8,8 +8,11 @@ stages:
 services:
   - docker:dind
 
+variables:
+  DOCKER_DRIVER: overlay2
+
 before_script:
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 build_backend:
   stage: build

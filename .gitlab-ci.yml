@@ -14,21 +14,44 @@ variables:
 before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
+# Build backend
 build_backend:
   stage: build
   script:
     - docker build -t $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME -f backend/Dockerfile backend
-    - docker save -o backend_image.tar $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME  # Simpan image sebagai file
+    - docker save -o backend_image.tar $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME
   artifacts:
     paths:
-      - backend_image.tar  # Simpan file agar bisa digunakan di stage push
+      - backend_image.tar
   only:
     - main
 
+# Push backend
 push_backend:
   stage: push
   script:
-    - docker load -i backend_image.tar  # Load image dari file
+    - docker load -i backend_image.tar
     - docker push $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME
+  only:
+    - main
+
+# Build frontend
+build_frontend:
+  stage: build
+  script:
+    - docker build -t $DOCKER_USERNAME/sesi9_frontend:$CI_COMMIT_REF_NAME -f frontend/Dockerfile frontend
+    - docker save -o frontend_image.tar $DOCKER_USERNAME/sesi9_frontend:$CI_COMMIT_REF_NAME
+  artifacts:
+    paths:
+      - frontend_image.tar
+  only:
+    - main
+
+# Push frontend
+push_frontend:
+  stage: push
+  script:
+    - docker load -i frontend_image.tar
+    - docker push $DOCKER_USERNAME/sesi9_frontend:$CI_COMMIT_REF_NAME
   only:
     - main

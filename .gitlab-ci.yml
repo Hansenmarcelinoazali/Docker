@@ -1,0 +1,55 @@
+stages:
+  - build
+  - push
+  - deploy
+
+variables:
+  DOCKER_IMAGE_BACKEND: $DOCKER_USERNAME/sesi9_backend
+  DOCKER_IMAGE_FRONTEND: $DOCKER_USERNAME/sesi9_frontend
+  DOCKER_IMAGE_DB: $DOCKER_USERNAME/sesi9_db
+  DOCKER_DRIVER: overlay2
+
+before_script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+build_backend:
+  stage: build
+  script:
+    - docker build -t $DOCKER_IMAGE_BACKEND:$CI_COMMIT_REF_NAME -f backend/Dockerfile backend
+  only:
+    - main
+
+build_frontend:
+  stage: build
+  script:
+    - docker build -t $DOCKER_IMAGE_FRONTEND:$CI_COMMIT_REF_NAME -f frontend/Dockerfile frontend
+  only:
+    - main
+
+push_backend:
+  stage: push
+  script:
+    - docker push $DOCKER_IMAGE_BACKEND:$CI_COMMIT_REF_NAME
+  only:
+    - main
+
+push_frontend:
+  stage: push
+  script:
+    - docker push $DOCKER_IMAGE_FRONTEND:$CI_COMMIT_REF_NAME
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  script:
+    - |
+      ssh $SERVER_SSH << 'EOF'
+      cd $SERVER_DEPLOY_PATH
+      docker pull $DOCKER_IMAGE_BACKEND:$CI_COMMIT_REF_NAME
+      docker pull $DOCKER_IMAGE_FRONTEND:$CI_COMMIT_REF_NAME
+      docker-compose down
+      docker-compose up -d
+      EOF

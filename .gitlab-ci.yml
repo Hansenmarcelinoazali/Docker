@@ -18,6 +18,17 @@ build_backend:
   stage: build
   script:
     - docker build -t $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME -f backend/Dockerfile backend
+    - docker save -o backend_image.tar $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME  # Simpan image sebagai file
+  artifacts:
+    paths:
+      - backend_image.tar  # Simpan file agar bisa digunakan di stage push
+  only:
+    - main
+
+push_backend:
+  stage: push
+  script:
+    - docker load -i backend_image.tar  # Load image dari file
     - docker push $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME
   only:
     - main

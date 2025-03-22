@@ -18,14 +18,6 @@ build_backend:
   stage: build
   script:
     - docker build -t $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME -f backend/Dockerfile backend
-  only:
-    - main
-
-push_backend:
-  stage: push
-  script:
     - docker push $DOCKER_USERNAME/sesi9_backend:$CI_COMMIT_REF_NAME
   only:
     - main
-
-#change1
